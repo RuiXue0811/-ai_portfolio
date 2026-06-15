@@ -1,0 +1,14 @@
+[Unit]
+Description=初级管理模拟器
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/mgmt-bot
+ExecStart=/opt/mgmt-bot/venv/bin/python bot.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/opt/mgmt-bot/bot.log
+StandardError=append:/opt/mgmt-bot/bot.log
+
+[Install]
+WantedBy=multi-user.target
