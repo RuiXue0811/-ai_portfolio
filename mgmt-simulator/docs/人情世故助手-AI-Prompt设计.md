@@ -1,4 +1,4 @@
-# 人情世故助手 AI Prompt 设计
+# 初级管理模拟器手 AI Prompt 设计
 
 ## 一、系统角色定义（System Prompt）
 
