@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sylvia · AI 产品 &amp; 运营自动化作品集</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --sub: #8b949e;
+  --blue: #58a6ff;
+  --teal: #39d353;
+  --amber: #d29922;
+  --purple: #bc8cff;
+  --green: #3fb950;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── HERO ── */
+.hero {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 72px 24px 48px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #58a6ff 0%, #39d353 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+  border: 3px solid var(--border);
+}
+
+.hero-info { flex: 1; min-width: 220px; }
+
+.hero-name {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  font-size: 15px;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.hero-desc {
+  font-size: 13.5px;
+  color: var(--sub);
+  max-width: 520px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--sub);
+}
+
+.tag-blue   { border-color: rgba(88,166,255,.4);  color: var(--blue);   background: rgba(88,166,255,.08); }
+.tag-green  { border-color: rgba(63,185,80,.4);   color: var(--green);  background: rgba(63,185,80,.08); }
+.tag-purple { border-color: rgba(188,140,255,.4); color: var(--purple); background: rgba(188,140,255,.08); }
+.tag-amber  { border-color: rgba(210,153,34,.4);  color: var(--amber);  background: rgba(210,153,34,.08); }
+
+/* ── STATS ── */
+.stats-row {
+  max-width: 860px;
+  margin: 0 auto 48px;
+  padding: 0 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 140px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.stat-num {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.stat-label { font-size: 12px; color: var(--sub); }
+
+/* ── SECTION ── */
+.section {
+  max-width: 860px;
+  margin: 0 auto 48px;
+  padding: 0 24px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── PROJECT CARDS ── */
+.projects { display: flex; flex-direction: column; gap: 16px; }
+
+.project-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+  text-decoration: none;
+  display: block;
+  color: inherit;
+}
+
+.project-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+}
+
+.project-card.wip { opacity: .6; pointer-events: none; }
+
+.project-top {
+  padding: 20px 24px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.project-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.icon-blue   { background: rgba(88,166,255,.12);  border: 1px solid rgba(88,166,255,.2); }
+.icon-green  { background: rgba(63,185,80,.12);   border: 1px solid rgba(63,185,80,.2); }
+.icon-purple { background: rgba(188,140,255,.12); border: 1px solid rgba(188,140,255,.2); }
+.icon-amber  { background: rgba(210,153,34,.12);  border: 1px solid rgba(210,153,34,.2); }
+
+.project-meta { flex: 1; }
+
+.project-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.project-sub {
+  font-size: 12.5px;
+  color: var(--sub);
+  margin-bottom: 10px;
+}
+
+.project-desc {
+  font-size: 13px;
+  color: var(--sub);
+  line-height: 1.7;
+}
+
+.project-footer {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.project-link {
+  font-size: 12px;
+  color: var(--blue);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wip-badge {
+  padding: 2px 8px;
+  background: rgba(210,153,34,.12);
+  border: 1px solid rgba(210,153,34,.3);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.live-badge {
+  padding: 2px 8px;
+  background: rgba(63,185,80,.12);
+  border: 1px solid rgba(63,185,80,.3);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+/* ── HIGHLIGHTS ── */
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.hl-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.hl-icon { font-size: 20px; margin-bottom: 8px; }
+.hl-title { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.hl-desc { font-size: 12.5px; color: var(--sub); line-height: 1.65; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--sub);
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .hero { flex-direction: column; gap: 20px; padding: 40px 16px 32px; }
+  .highlights { grid-template-columns: 1fr; }
+  .stats-row { flex-direction: column; }
+  .section { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="avatar">💡</div>
+  <div class="hero-info">
+    <h1 class="hero-name">Sylvia</h1>
+    <div class="hero-title">AI 产品设计 · 信贷运营自动化</div>
+    <p class="hero-desc">
+      3 年信贷运营经验，专注于将业务 SOP 转化为 AI 工作流。
+      擅长 Prompt Engineering、Claude Code Skill 开发与运营工具自动化，
+      用 AI 解决真实业务痛点。
+    </p>
+    <div class="hero-tags">
+      <span class="tag tag-blue">Claude Code Skill</span>
+      <span class="tag tag-green">Prompt Engineering</span>
+      <span class="tag tag-purple">Coze Workflow</span>
+      <span class="tag tag-amber">信贷运营 3 年</span>
+      <span class="tag">AI 产品设计</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── STATS ── -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--green)">100%</div>
+    <div class="stat-label">用户分层准确率</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--blue)">95%+</div>
+    <div class="stat-label">合规话术通过率</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--purple)">7节点</div>
+    <div class="stat-label">全链路工作流</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:var(--amber)">&lt;15s</div>
+    <div class="stat-label">单用户处理时间</div>
+  </div>
+</div>
+
+<!-- ── PROJECTS ── -->
+<div class="section">
+  <div class="section-title">项目作品</div>
+  <div class="projects">
+
+    <!-- Project 1: Finance Loan Bot -->
+    <a class="project-card" href="finance-loan-bot.html">
+      <div class="project-top">
+        <div class="project-icon icon-blue">💳</div>
+        <div class="project-meta">
+          <div class="project-name">
+            金融用户复贷智能触达系统
+            <span class="live-badge"><span class="live-dot"></span>Live Demo</span>
+          </div>
+          <div class="project-sub">Claude Code Skill · Coze Workflow · Prompt Engineering</div>
+          <div class="project-desc">
+            将 3 年信贷运营 SOP 转化为 AI 全自动化工作流。输入用户数据，自动完成
+            分层识别 → 话术生成 → 合规审查 → 触达策略建议，
+            单用户处理 &lt;15s，合规通过率 95%+。
+          </div>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-tags">
+          <span class="tag tag-blue">用户分层</span>
+          <span class="tag tag-green">合规审查</span>
+          <span class="tag">话术生成</span>
+          <span class="tag">触达策略</span>
+        </div>
+        <span class="project-link">查看 Demo →</span>
+      </div>
+    </a>
+
+    <!-- Project 2: WIP placeholder -->
+    <div class="project-card wip">
+      <div class="project-top">
+        <div class="project-icon icon-purple">🔧</div>
+        <div class="project-meta">
+          <div class="project-name">
+            更多项目
+            <span class="wip-badge">即将上线</span>
+          </div>
+          <div class="project-sub">持续更新中…</div>
+          <div class="project-desc">
+            更多 AI 自动化工具与 Skill 项目正在建设中，敬请期待。
+          </div>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="project-tags">
+          <span class="tag">Claude Code Skill</span>
+          <span class="tag">AI 工作流</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── HIGHLIGHTS ── -->
+<div class="section">
+  <div class="section-title">核心能力</div>
+  <div class="highlights">
+    <div class="hl-card">
+      <div class="hl-icon">🧠</div>
+      <div class="hl-title">Prompt Engineering</div>
+      <div class="hl-desc">能精准区分 LLM 适用边界；用 Few-shot 示例替代规则文字，大幅提升模型稳定性</div>
+    </div>
+    <div class="hl-card">
+      <div class="hl-icon">⚙️</div>
+      <div class="hl-title">AI 工作流设计</div>
+      <div class="hl-desc">从 Coze 无代码原型到 Claude Code Skill，完整掌握 AI 工作流的设计、排障与迭代</div>
+    </div>
+    <div class="hl-card">
+      <div class="hl-icon">📋</div>
+      <div class="hl-title">信贷运营 SOP</div>
+      <div class="hl-desc">3 年信贷运营实战，深度理解用户分层、合规话术、触达策略等业务逻辑</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Sylvia · AI 产品 &amp; 运营自动化作品集 · 持续更新
+</footer>
+
+</body>
+</html>

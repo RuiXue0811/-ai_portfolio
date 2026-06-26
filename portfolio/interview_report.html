@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目复盘报告 · 金融用户复贷智能触达系统</title>
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --sub: #4a4a6a;
+    --muted: #8888aa;
+    --border: #e8e8f0;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --blue: #3b6fd4;
+    --teal: #0ea5a0;
+    --amber: #d97706;
+    --green: #059669;
+    --pink: #c026a0;
+    --purple: #7c3aed;
+    --red: #dc2626;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 40px 80px;
+  }
+
+  /* ── HEADER ── */
+  .report-header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+
+  .report-tag {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .report-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+
+  .report-sub {
+    font-size: 15px;
+    color: var(--sub);
+    margin-bottom: 20px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .meta-item strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .tag-s  { background: #dbeafe; color: #1d4ed8; }
+  .tag-t  { background: #ccfbf1; color: #0f766e; }
+  .tag-a1 { background: #fef3c7; color: #b45309; }
+  .tag-a2 { background: #fce7f3; color: #be185d; }
+  .tag-r  { background: #dcfce7; color: #15803d; }
+  .tag-l  { background: #ede9fe; color: #6d28d9; }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* ── CARDS ── */
+  .cards {
+    display: grid;
+    gap: 12px;
+  }
+
+  .cards-3 { grid-template-columns: repeat(3, 1fr); }
+  .cards-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-top: 3px solid var(--border);
+  }
+
+  .card.blue   { border-top-color: var(--blue); }
+  .card.teal   { border-top-color: var(--teal); }
+  .card.amber  { border-top-color: var(--amber); }
+  .card.green  { border-top-color: var(--green); }
+  .card.pink   { border-top-color: var(--pink); }
+  .card.purple { border-top-color: var(--purple); }
+  .card.red    { border-top-color: var(--red); }
+
+  .card-head {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .card-body {
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.7;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+
+  .flow-node {
+    flex: 1;
+    min-width: 100px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 12.5px;
+  }
+
+  .flow-node .fn-num {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .flow-node .fn-label {
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  .flow-node .fn-sub {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .flow-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    color: var(--muted);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── TIMELINE (bugs) ── */
+  .timeline { margin: 16px 0; }
+
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+
+  .tl-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+    border: 2px solid;
+  }
+
+  .tl-content { flex: 1; }
+
+  .tl-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  .tl-cause {
+    font-size: 13px;
+    color: var(--sub);
+    margin-bottom: 6px;
+    line-height: 1.6;
+  }
+
+  .tl-fix {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  /* ── DECISION TABLE ── */
+  .dtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .dtable th {
+    background: #f1f5f9;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sub);
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+
+  .dtable td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    color: var(--sub);
+    line-height: 1.6;
+    vertical-align: top;
+  }
+
+  .dtable tr:hover td { background: #f8fafc; }
+
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); }
+  .better { color: var(--blue); font-weight: 600; }
+
+  /* ── STATS ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .stat-delta {
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 600;
+    margin-top: 3px;
+  }
+
+  /* ── HIGHLIGHT QUOTE ── */
+  .quote {
+    background: var(--card);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--sub);
+    line-height: 1.8;
+    margin: 16px 0;
+  }
+
+  .quote strong { color: var(--ink); }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: #166534;
+    line-height: 1.7;
+    margin: 12px 0;
+  }
+
+  .insight-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  /* ── PHASE BADGE ── */
+  .phase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .phase-1 { background: #dbeafe; color: #1d4ed8; }
+  .phase-2 { background: #ede9fe; color: #6d28d9; }
+
+  /* ── UPGRADE ARROW ── */
+  .upgrade-arrow {
+    text-align: center;
+    padding: 12px 0;
+    color: var(--muted);
+    font-size: 22px;
+  }
+
+  /* ── INTERVIEW TIPS ── */
+  .tips-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 48px;
+  }
+
+  .tips-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .tip-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #78350f;
+    line-height: 1.65;
+  }
+
+  .tip-q {
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 20px;
+  }
+
+  /* ── DIVIDER ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { font-size: 13px; }
+    .page { padding: 32px 24px; }
+    .tips-box { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    .cards-3 { grid-template-columns: 1fr; }
+    .cards-2 { grid-template-columns: 1fr; }
+    .stats    { grid-template-columns: repeat(2, 1fr); }
+    .flow     { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .page { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══ -->
+  <div class="report-header">
+    <p class="report-tag">项目复盘报告 · 面试版</p>
+    <h1 class="report-title">金融用户复贷智能触达系统</h1>
+    <p class="report-sub">从 Coze 工作流原型到 Claude Code Skill 的全链路自动化实践</p>
+    <div class="meta-row">
+      <span class="meta-item"><strong>项目周期</strong>：2025.05 — 2026.05</span>
+      <span class="meta-item"><strong>角色</strong>：独立设计 + 全程实现</span>
+      <span class="meta-item"><strong>技术栈</strong>：Coze · Prompt Engineering · Claude API · JavaScript</span>
+      <span class="meta-item"><strong>方法论</strong>：STAR 法则</span>
+    </div>
+  </div>
+
+
+  <!-- ══ S — SITUATION ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-s">S — Situation</span>
+      <h2 class="section-title">背景：信贷运营的三个结构性痛点</h2>
+    </div>
+
+    <div class="cards cards-3">
+      <div class="card blue">
+        <div class="card-head">📉 复贷率低</div>
+        <div class="card-body">存量用户结清后沉默，缺乏有效的个性化触达机制，复贷转化靠人工跟进，规模化困难</div>
+      </div>
+      <div class="card amber">
+        <div class="card-head">⏱️ 运营效率低</div>
+        <div class="card-body">不同用户类型需手动分版本写话术，一个运营每天只能处理有限用户，无法覆盖全量存量池</div>
+      </div>
+      <div class="card red">
+        <div class="card-head">⚠️ 合规风险高</div>
+        <div class="card-body">金融广告话术极易触碰银保监红线（如"保证放款""零门槛"），违规后果严重，靠人工审核漏洞大</div>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top: 16px;">
+      我有 3 年信贷运营经验，深知这条链路的问题：<strong>分层靠人工、话术靠感觉、合规靠运气。</strong>
+      这个项目的出发点，是把我脑子里的 SOP 系统化、自动化，让它能跑起来、能复用、能扩展。
+    </div>
+  </div>
+
+
+  <!-- ══ T — TASK ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-t">T — Task</span>
+      <h2 class="section-title">目标：把信贷 SOP 跑进 AI 工作流</h2>
+    </div>
+
+    <div class="cards cards-2">
+      <div class="card teal">
+        <div class="card-head">🎯 核心链路目标</div>
+        <div class="card-body">
+          实现从"输入用户数据"到"输出可用触达方案"的全自动化——<br>
+          用户分层 → 知识库检索 → 话术生成 → 合规审查 → 触达策略建议，全程无需人工干预
+        </div>
+      </div>
+      <div class="card purple">
+        <div class="card-head">📐 约束条件</div>
+        <div class="card-body">
+          ① 分层规则必须 100% 准确，不能靠 LLM "猜"<br>
+          ② 合规审查必须覆盖 7 类监管红线词<br>
+          ③ 输出格式要结构化，让运营可以直接使用，无需二次处理
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ A1 — PHASE 1 (COZE) ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-a1">A — Action</span>
+      <h2 class="section-title">第一阶段：用 Coze 搭建 MVP 原型</h2>
+    </div>
+
+    <div class="phase-badge phase-1">Phase 1 · Coze 无代码工作流</div>
+
+    <p style="color: var(--sub); font-size: 14px; margin-bottom: 16px;">
+      选择 Coze 是因为它能快速验证业务逻辑，无需搭建基础设施。目标是先把流程跑通，找到真正的难点。
+    </p>
+
+    <div class="flow">
+      <div class="flow-node">
+        <div class="fn-num">Node 1</div>
+        <div class="fn-label">用户分层</div>
+        <div class="fn-sub">A/B/C/D 四层</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-node">
+        <div class="fn-num">Node 2</div>
+        <div class="fn-label">知识库检索</div>
+        <div class="fn-sub">合规话术库</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-node">
+        <div class="fn-num">Node 3</div>
+        <div class="fn-label">话术生成</div>
+        <div class="fn-sub">3 种风格</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-node">
+        <div class="fn-num">Node 4</div>
+        <div class="fn-label">合规审查</div>
+        <div class="fn-sub">7 类红线词</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-node">
+        <div class="fn-num">Node 5</div>
+        <div class="fn-label">触达建议</div>
+        <div class="fn-sub">渠道/时间/紧急度</div>
+      </div>
+    </div>
+
+    <p style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 20px 0 12px;">排障过程：三个核心 Bug 的根因与修复</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color: #dc2626; color: #dc2626;">B1</div>
+        <div class="tl-content">
+          <div class="tl-title">合规节点 3/3 全部失败（通过率 0%）</div>
+          <div class="tl-cause">
+            根因：Prompt 只列了规则文字，LLM 把 warning 级别的用词也判成了 FAIL，且不输出二值结果。<br>
+            <strong>规则文字对 LLM 的约束力远弱于具体示例。</strong>
+          </div>
+          <span class="tl-fix">修复：加入 4 个 PASS/FAIL 对照示例 + 显式要求输出二值判断 → 通过率 0% → 89%</span>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color: #d97706; color: #d97706;">B2</div>
+        <div class="tl-content">
+          <div class="tl-title">模板变量字面量泄露（输出 &#123;&#123;days_since_claer&#125;&#125;）</div>
+          <div class="tl-cause">
+            根因：变量名拼错（claer → clear），Coze 变量绑定严格匹配，拼错后静默降级为字面量字符串，不报错。<br>
+            <strong>无代码平台的变量绑定是隐式的，比代码更难 debug。</strong>
+          </div>
+          <span class="tl-fix">修复：纠正变量名 + 改从节点"输入"区接收字段，不用双花括号写法</span>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color: #3b6fd4; color: #3b6fd4;">B3</div>
+        <div class="tl-content">
+          <div class="tl-title">用户 U_C003（days=75）分到 A 层，应为 C 层</div>
+          <div class="tl-cause">
+            根因：LLM 数值比较存在盲区，75 &gt; 30 但它判成了 A 层条件。<br>
+            <strong>数值比较不该交给 LLM，这是硬规则，LLM 做的是"理解"不是"计算"。</strong>
+          </div>
+          <span class="tl-fix">修复：加入「D → A → B → C → 兜底」命中即停的判定顺序 + 把 75 天反例写入 prompt → 分层准确率 100%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-title">Phase 1 核心洞察</div>
+      这三个 Bug 让我总结出一条原则：<strong>能用代码做的硬规则，绝不交给 LLM。</strong>
+      LLM 的价值在于理解语义、生成内容，而不是做精确计算或严格匹配。
+      把它用在错误的地方，是不稳定性的根源。
+    </div>
+  </div>
+
+
+  <!-- ══ A2 — PHASE 2 (SKILL) ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-a2">A — Action</span>
+      <h2 class="section-title">第二阶段：升级为 Claude Code Skill</h2>
+    </div>
+
+    <div class="phase-badge phase-2">Phase 2 · Claude Code Skill 重构</div>
+
+    <p style="font-size: 14px; color: var(--sub); margin-bottom: 16px;">
+      Coze 原型验证了业务逻辑可行，但暴露了平台本身的三个瓶颈，促使我做架构升级。
+    </p>
+
+    <table class="dtable">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>Coze 的瓶颈</th>
+          <th>Skill 的解法</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>分层准确性</strong></td>
+          <td class="cross">依赖 LLM 判断数值，B3 Bug 根源在此</td>
+          <td class="better">改写为确定性 if/else 代码，从根本上消除 LLM 数值盲区</td>
+        </tr>
+        <tr>
+          <td><strong>合规审查质量</strong></td>
+          <td class="cross">Coze 内置模型语义理解有限，需大量 few-shot 才能到 89%</td>
+          <td class="better">接入 Claude API，语义理解能力大幅提升，合规通过率提升至 95%+</td>
+        </tr>
+        <tr>
+          <td><strong>批量处理</strong></td>
+          <td class="cross">单次只能处理一条，批量需付费升级 Coze 计划</td>
+          <td class="better">原生支持多用户并行处理，一次输入 CSV 跑全量存量池</td>
+        </tr>
+        <tr>
+          <td><strong>知识库维护</strong></td>
+          <td class="cross">Coze 知识库 UI 操作，版本管理不透明</td>
+          <td class="better">合规话术库以本地文件存储，可 Git 版本管理，改动有记录</td>
+        </tr>
+        <tr>
+          <td><strong>可复用性</strong></td>
+          <td class="cross">换数据要重新配置节点参数</td>
+          <td class="better">Skill 接受结构化输入，换数据直接跑，零配置成本</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 20px 0 12px;">Skill 架构设计：三个关键决策</p>
+
+    <div class="cards cards-3">
+      <div class="card blue">
+        <div class="card-head">决策 1：分层逻辑代码化</div>
+        <div class="card-body">
+          将 A/B/C/D 分层规则写成纯 JavaScript 函数，输入 days_since_clear 和行为标签，
+          输出层级字符串。<br><br>
+          确定性代码替代 LLM 判断，分层准确率从"依赖 prompt 质量"变成 <strong>100% 可保证</strong>
+        </div>
+      </div>
+      <div class="card purple">
+        <div class="card-head">决策 2：合规审查 Claude 化</div>
+        <div class="card-body">
+          合规审查任务交给 Claude API，用结构化 Prompt 传入 7 类红线词规则 + PASS/FAIL 示例。<br><br>
+          Claude 的语义理解更强，能识别隐式违规（如"基本上都能通过"）而不只是关键词匹配
+        </div>
+      </div>
+      <div class="card teal">
+        <div class="card-head">决策 3：批量并行处理</div>
+        <div class="card-body">
+          Skill 接收用户数据数组，对每条记录并行调用 AI 节点，
+          最终输出结构化 JSON，方便下游系统直接消费。<br><br>
+          100 个用户从顺序跑的 25 分钟，降到并行的 <strong>约 2 分钟</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ R — RESULT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-r">R — Result</span>
+      <h2 class="section-title">成果：两阶段对比</h2>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num" style="color: var(--green)">100%</div>
+        <div class="stat-label">用户分层准确率</div>
+        <div class="stat-delta">▲ 代码保证，不依赖模型</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color: var(--blue)">95%+</div>
+        <div class="stat-label">合规话术通过率</div>
+        <div class="stat-delta">▲ 从 Coze 89% 提升</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color: var(--teal)">&lt;15s</div>
+        <div class="stat-label">单用户处理时间</div>
+        <div class="stat-delta">与 Phase 1 持平</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" style="color: var(--purple)">~2min</div>
+        <div class="stat-label">100 用户批量处理</div>
+        <div class="stat-delta">▲ 从顺序 25min 压缩</div>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top: 20px;">
+      更重要的是，这套系统把<strong>「分层靠人工、话术靠感觉、合规靠运气」</strong>变成了
+      <strong>「分层靠代码、话术靠 AI、合规靠系统」</strong>。<br><br>
+      换一批用户数据，直接跑，0 额外配置。这是做这个项目最核心的价值：
+      <strong>把我 3 年的信贷运营经验沉淀成了可复用的 SOP。</strong>
+    </div>
+  </div>
+
+
+  <!-- ══ L — LEARNINGS ══ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-tag tag-l">L — Learnings</span>
+      <h2 class="section-title">三条可迁移的经验</h2>
+    </div>
+
+    <div class="cards cards-3">
+      <div class="card purple">
+        <div class="card-head">① LLM 的适用边界</div>
+        <div class="card-body">
+          LLM 擅长语义理解和内容生成，<strong>不适合做精确数值比较和严格规则匹配</strong>。
+          B3 Bug 就是把错误任务交给了 LLM。
+          识别这条边界，是 Prompt Engineering 里最重要的判断力。
+        </div>
+      </div>
+      <div class="card teal">
+        <div class="card-head">② 示例 &gt; 规则文字</div>
+        <div class="card-body">
+          在合规审查里，把规则写成文字描述效果差，
+          <strong>加入 PASS/FAIL 对照示例后通过率从 0% 到 89%</strong>。
+          LLM 是通过模式匹配学习的，具体示例比抽象规则对它更有效。
+        </div>
+      </div>
+      <div class="card amber">
+        <div class="card-head">③ 先 MVP 后重构</div>
+        <div class="card-body">
+          用 Coze 快速出原型，找到真实痛点（B1/B2/B3），再针对性升级架构。
+          <strong>不是一开始就写代码，而是用最低成本先验证业务逻辑。</strong>
+          这个顺序让后期的重构更有方向。
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ INTERVIEW TIPS ══ -->
+  <div class="tips-box">
+    <div class="tips-title">面试作答提示（仅供自用）</div>
+
+    <div class="tip-item">
+      <span class="tip-q">Q1</span>
+      <span>「你做这个项目的出发点是什么？」→ 讲 S（三个痛点），重点说"3年运营经验，深知这条链路的问题"，有业务背景 + 主动解决的姿态</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-q">Q2</span>
+      <span>「遇到了什么困难？怎么解决的？」→ 讲 B1/B2/B3，每个 Bug 说清楚根因和修复方向，核心要抛出那条原则：<strong>能用代码做的硬规则，绝不交给 LLM</strong></span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-q">Q3</span>
+      <span>「为什么要从 Coze 换到 Claude Code Skill？」→ 这是技术判断力的体现，强调：平台验证逻辑 → 发现瓶颈 → 针对性升级，不是盲目追技术，是根据问题选工具</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-q">Q4</span>
+      <span>「这个项目对你有什么影响？」→ 回到 L，讲 LLM 适用边界 + 示例的威力 + MVP 思路，这三点可以迁移到任何 AI 产品设计中</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-q">Q5</span>
+      <span>「如果继续迭代你会做什么？」→ 接真实用户数据库（CRM API）、A/B 测试不同话术的实际转化率、构建反馈闭环来持续优化分层规则</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
