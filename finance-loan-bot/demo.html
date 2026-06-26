@@ -627,18 +627,10 @@ body {
         <div class="field">
           <label>行为标签（可多选）</label>
           <div class="checkboxes" id="tags">
-            <label class="cb-item checked" data-val="按时还款">
-              <input type="checkbox" checked> 按时还款
-            </label>
-            <label class="cb-item" data-val="曾投诉">
-              <input type="checkbox"> 曾投诉
-            </label>
-            <label class="cb-item" data-val="曾逾期">
-              <input type="checkbox"> 曾逾期
-            </label>
-            <label class="cb-item" data-val="主动咨询">
-              <input type="checkbox"> 主动咨询
-            </label>
+            <div class="cb-item checked" data-val="按时还款">按时还款</div>
+            <div class="cb-item" data-val="曾投诉">曾投诉</div>
+            <div class="cb-item" data-val="曾逾期">曾逾期</div>
+            <div class="cb-item" data-val="主动咨询">主动咨询</div>
           </div>
         </div>
 
@@ -856,7 +848,6 @@ function loadPreset(tier) {
   document.getElementById("purpose").value = p.purpose;
   document.querySelectorAll(".cb-item").forEach(el => {
     const checked = p.tags.includes(el.dataset.val);
-    el.querySelector("input").checked = checked;
     el.classList.toggle("checked", checked);
   });
   runBot();
@@ -964,10 +955,8 @@ function copyJson() {
 
 // checkbox toggle
 document.querySelectorAll(".cb-item").forEach(el => {
-  el.addEventListener("click", (e) => {
-    e.preventDefault();
+  el.addEventListener("click", () => {
     el.classList.toggle("checked");
-    el.querySelector("input").checked = el.classList.contains("checked");
   });
 });
 
