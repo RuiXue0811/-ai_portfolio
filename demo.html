@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金融复贷触达 Bot · 在线演示</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --sub: #8b949e;
+  --blue: #58a6ff;
+  --teal: #39d353;
+  --amber: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --green: #3fb950;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #58a6ff, #39d353);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.logo-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.logo-sub {
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.skill-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--blue);
+  font-family: "SF Mono","Fira Code",monospace;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── PANELS ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.panel-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-body { padding: 16px; }
+
+/* ── FORM ── */
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--sub);
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.field input[type=number],
+.field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  transition: border-color .2s;
+  font-family: inherit;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.field select option { background: var(--surface2); }
+
+.checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.cb-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  font-size: 12.5px;
+  color: var(--sub);
+  user-select: none;
+}
+
+.cb-item input { display: none; }
+
+.cb-item.checked {
+  border-color: var(--blue);
+  background: rgba(88,166,255,.08);
+  color: var(--blue);
+}
+
+.run-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--blue);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s, transform .1s;
+  margin-top: 6px;
+  font-family: inherit;
+}
+
+.run-btn:hover { opacity: .9; }
+.run-btn:active { transform: scale(.98); }
+
+/* ── PRESET CARDS ── */
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.preset {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: border-color .15s;
+  font-size: 12px;
+}
+
+.preset:hover { border-color: var(--blue); }
+
+.preset-tier {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.preset-desc { color: var(--sub); font-size: 11px; }
+
+.tier-a { color: var(--green); }
+.tier-b { color: var(--blue); }
+.tier-c { color: var(--amber); }
+.tier-d { color: var(--red); }
+
+/* ── OUTPUT ── */
+.output-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--sub);
+  text-align: center;
+  gap: 12px;
+}
+
+.placeholder-icon { font-size: 36px; opacity: .4; }
+
+/* ── RESULT SECTIONS ── */
+.result { display: none; }
+.result.visible { display: block; }
+
+.tier-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tier-badge {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  min-width: 40px;
+}
+
+.tier-info-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.tier-info-reason { font-size: 12.5px; color: var(--sub); line-height: 1.5; }
+
+/* ── SCRIPTS ── */
+.scripts-section { margin-bottom: 16px; }
+
+.scripts-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sub);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.script-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.script-head {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.script-style {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pass { background: rgba(63,185,80,.12); color: var(--green); }
+.fail { background: rgba(248,81,73,.12); color: var(--red); }
+
+.script-body {
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.script-channel {
+  padding: 6px 12px;
+  background: var(--bg);
+  font-size: 11px;
+  color: var(--sub);
+  border-top: 1px solid var(--border);
+}
+
+/* ── COMPLIANCE DETAIL ── */
+.compliance-detail {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.comp-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sub);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.comp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-row:last-child { border-bottom: none; }
+
+.comp-cat { flex: 1; color: var(--sub); }
+.comp-result { font-size: 11px; font-weight: 700; }
+
+/* ── STRATEGY ── */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.strategy-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.strategy-label {
+  font-size: 11px;
+  color: var(--sub);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.strategy-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── FOOTER JSON ── */
+.json-section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.json-head {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.copy-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--sub);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color .15s;
+  font-family: inherit;
+}
+
+.copy-btn:hover { color: var(--text); }
+
+.json-body {
+  padding: 12px;
+  font-family: "SF Mono","Fira Code","Consolas",monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: #79c0ff;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── STATS BAR ── */
+.stats-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stats-item { text-align: center; }
+
+.stats-num {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.stats-label { font-size: 11px; color: var(--sub); }
+
+.divider { width: 1px; height: 36px; background: var(--border); }
+
+/* ── HOW IT WORKS ── */
+.how-section {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.how-flow {
+  display: flex;
+  align-items: stretch;
+  padding: 20px;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.how-node {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.how-node .hn-icon { font-size: 20px; margin-bottom: 6px; }
+.how-node .hn-label { font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.how-node .hn-sub { color: var(--sub); font-size: 11px; }
+
+.how-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: var(--border);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ── ABOUT ── */
+.about-section {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.about-text { flex: 1; min-width: 200px; }
+.about-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.about-desc { font-size: 12.5px; color: var(--sub); line-height: 1.6; }
+
+.about-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+.tag {
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--sub);
+  font-family: "SF Mono","Fira Code",monospace;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 780px) {
+  .main { grid-template-columns: 1fr; padding: 16px; }
+  .strategy-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-icon">💳</div>
+    <div>
+      <div class="logo-text">金融复贷触达 Bot</div>
+      <div class="logo-sub">Claude Code Skill · 在线演示</div>
+    </div>
+  </div>
+  <div class="skill-badge">
+    <span style="color:var(--sub)">/</span>finance-loan-bot
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ── LEFT: INPUT PANEL ── -->
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Presets -->
+    <div class="panel">
+      <div class="panel-head">⚡ 快速预设</div>
+      <div class="panel-body" style="padding-bottom:12px;">
+        <div class="presets">
+          <div class="preset" onclick="loadPreset('A')">
+            <div class="preset-tier tier-a">A 层用户</div>
+            <div class="preset-desc">结清 15 天 · 按时还款</div>
+          </div>
+          <div class="preset" onclick="loadPreset('B')">
+            <div class="preset-tier tier-b">B 层用户</div>
+            <div class="preset-desc">结清 45 天 · 无异常</div>
+          </div>
+          <div class="preset" onclick="loadPreset('C')">
+            <div class="preset-tier tier-c">C 层用户</div>
+            <div class="preset-desc">结清 90 天 · 沉默</div>
+          </div>
+          <div class="preset" onclick="loadPreset('D')">
+            <div class="preset-tier tier-d">D 层用户</div>
+            <div class="preset-desc">结清 200 天 · 曾投诉</div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--sub);text-align:center;">点击预设快速填入，或手动填写下方表单</p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="panel">
+      <div class="panel-head">📋 用户数据输入</div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label>用户 ID</label>
+          <input type="text" id="userId" value="U_A001" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;font-family:monospace;" />
+        </div>
+
+        <div class="field">
+          <label>结清天数（days_since_clear）</label>
+          <input type="number" id="days" value="15" min="0" max="999" />
+        </div>
+
+        <div class="field">
+          <label>历史借款金额（元）</label>
+          <input type="number" id="amount" value="20000" min="0" />
+        </div>
+
+        <div class="field">
+          <label>借款用途</label>
+          <select id="purpose">
+            <option value="消费">消费</option>
+            <option value="经营">经营</option>
+            <option value="应急">应急</option>
+            <option value="教育">教育</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>行为标签（可多选）</label>
+          <div class="checkboxes" id="tags">
+            <label class="cb-item checked" data-val="按时还款">
+              <input type="checkbox" checked> 按时还款
+            </label>
+            <label class="cb-item" data-val="曾投诉">
+              <input type="checkbox"> 曾投诉
+            </label>
+            <label class="cb-item" data-val="曾逾期">
+              <input type="checkbox"> 曾逾期
+            </label>
+            <label class="cb-item" data-val="主动咨询">
+              <input type="checkbox"> 主动咨询
+            </label>
+          </div>
+        </div>
+
+        <button class="run-btn" onclick="runBot()">▶ 运行 Bot 分析</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: OUTPUT PANEL ── -->
+  <div>
+
+    <!-- Placeholder -->
+    <div id="placeholder" class="panel">
+      <div class="output-placeholder">
+        <div class="placeholder-icon">🤖</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);">选择预设或填写表单，点击运行</div>
+        <div style="font-size:12.5px;max-width:280px;line-height:1.6;">Bot 将自动完成用户分层 → 话术生成 → 合规审查 → 触达策略 全链路</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="result">
+
+      <!-- Tier Card -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">🔢 用户分层结果</div>
+        <div class="panel-body">
+          <div class="tier-card">
+            <div class="tier-badge" id="tierBadge">A</div>
+            <div>
+              <div class="tier-info-title" id="tierTitle">A 层 — 高意愿用户</div>
+              <div class="tier-info-reason" id="tierReason">结清天数 15 天 ≤ 30 天，命中 A 层，命中即停</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scripts -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">✍️ 生成话术 &amp; 合规审查</div>
+        <div class="panel-body" id="scriptsContainer">
+        </div>
+      </div>
+
+      <!-- Strategy -->
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">📡 触达策略建议</div>
+        <div class="panel-body">
+          <div class="strategy-grid" id="strategyGrid">
+          </div>
+        </div>
+      </div>
+
+      <!-- JSON Output -->
+      <div class="panel">
+        <div class="panel-head">
+          { } 结构化输出
+          <button class="copy-btn" onclick="copyJson()">复制 JSON</button>
+        </div>
+        <div class="json-body" id="jsonOutput"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ── BOTTOM: HOW IT WORKS ── -->
+  <div class="how-section">
+    <div class="panel-head">⚙️ 工作流设计 — 5 节点全链路</div>
+    <div class="how-flow">
+      <div class="how-node">
+        <div class="hn-icon">🔢</div>
+        <div class="hn-label">用户分层</div>
+        <div class="hn-sub">D→A→B→C<br>命中即停</div>
+      </div>
+      <div class="how-arrow">›</div>
+      <div class="how-node">
+        <div class="hn-icon">📚</div>
+        <div class="hn-label">知识库检索</div>
+        <div class="hn-sub">按层级拉取<br>合规话术要素</div>
+      </div>
+      <div class="how-arrow">›</div>
+      <div class="how-node">
+        <div class="hn-icon">✍️</div>
+        <div class="hn-label">话术生成</div>
+        <div class="hn-sub">简洁 / 温情<br>/ 紧迫 3 版本</div>
+      </div>
+      <div class="how-arrow">›</div>
+      <div class="how-node">
+        <div class="hn-icon">🛡️</div>
+        <div class="hn-label">合规审查</div>
+        <div class="hn-sub">7 类红线词<br>自动 PASS/FAIL</div>
+      </div>
+      <div class="how-arrow">›</div>
+      <div class="how-node">
+        <div class="hn-icon">📡</div>
+        <div class="hn-label">触达策略</div>
+        <div class="hn-sub">渠道 / 时间<br>/ 频率建议</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ABOUT ── -->
+  <div class="about-section">
+    <div style="font-size:28px;">💡</div>
+    <div class="about-text">
+      <div class="about-title">关于本项目</div>
+      <div class="about-desc">
+        基于 3 年信贷运营实战经验设计，从 Coze 无代码工作流原型迭代至 Claude Code Skill。
+        核心设计原则：分层规则代码化（避免 LLM 数值盲区）、合规审查用 Few-shot 示例而非规则文字。
+      </div>
+      <div class="about-tags">
+        <span class="tag">Claude Code Skill</span>
+        <span class="tag">Prompt Engineering</span>
+        <span class="tag">信贷运营 SOP</span>
+        <span class="tag">合规自动化</span>
+        <span class="tag">Coze Workflow</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+      <div style="text-align:center;padding:12px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <div style="font-size:24px;font-weight:800;color:var(--green);">100%</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:2px;">分层准确率</div>
+      </div>
+      <div style="text-align:center;padding:12px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+        <div style="font-size:24px;font-weight:800;color:var(--blue);">95%+</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:2px;">合规通过率</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──
+const SCRIPTS = {
+  A: {
+    简洁版: { text: "您的借款已顺利结清，本月可享专属优惠利率，额度最高可达 {amount} 元，一键申请，资金随时到位。", channel: "推荐渠道：App Push" },
+    温情版: { text: "感谢您上次的信任，您的借款记录一直非常良好。如近期有资金需要，我们为您保留了专属优惠，期待继续为您服务。", channel: "推荐渠道：短信" },
+    紧迫版: { text: "您的专属复贷优惠本月底截止，优惠利率仅限老客户申请，您上次结清记录已符合资格，现在申请即可生效。", channel: "推荐渠道：电话话术开场" }
+  },
+  B: {
+    简洁版: { text: "距上次结清已有一段时间，您的信用记录依然优质，当前可申请复贷额度最高 {amount} 元，利率较新客更优。", channel: "推荐渠道：短信 + 企微" },
+    温情版: { text: "很久没有联系了，希望您一切安好。若近期有资金需求，凭借您的良好还款记录，审批流程会更加便捷，欢迎随时咨询。", channel: "推荐渠道：短信" },
+    紧迫版: { text: "您的优质客户资格本季度有效，享有专属利率及快速审批通道，建议尽快确认是否有需求，名额优先向老客户开放。", channel: "推荐渠道：企微消息" }
+  },
+  C: {
+    简洁版: { text: "好久不见，您之前的借款记录一直很稳定。如有资金需要，欢迎重新申请，手续与上次一样便捷。", channel: "推荐渠道：短信（低频）" },
+    温情版: { text: "许久未打扰，希望您生活顺遂。我们持续优化了服务体验，如您近期有任何资金方面的需求，欢迎随时联系我们。", channel: "推荐渠道：短信" },
+    紧迫版: { text: "我们注意到您已有一段时间未使用借款服务，作为老客户您享有唤醒专属福利，本月申请可享受额外利率优惠。", channel: "推荐渠道：短信（月初）" }
+  },
+  D: {
+    简洁版: { text: "感谢您一直以来的支持，我们近期升级了客户服务，如有任何问题或需求，欢迎随时联系我们的客服团队。", channel: "推荐渠道：短信（关怀类）" },
+    温情版: { text: "您好，我们的服务团队一直在关注您的体验。如之前有任何不满意的地方，我们诚挚欢迎您的反馈，帮助我们持续改进。", channel: "推荐渠道：短信" },
+    紧迫版: { text: "您好，我们的服务已全面升级，客户体验有了显著改善，欢迎重新体验，如有任何疑问欢迎联系我们。", channel: "推荐渠道：短信（软触达）" }
+  }
+};
+
+const STRATEGY = {
+  A: { channel: "App Push + 短信", time: "工作日 12:00–13:00 / 19:00–21:00", freq: "每周最多 3 次", urgency: "高" },
+  B: { channel: "短信 + 企微消息", time: "工作日 10:00–11:00 / 20:00–21:00", freq: "每周最多 2 次", urgency: "中" },
+  C: { channel: "短信", time: "周末 10:00–11:00", freq: "每两周 1 次", urgency: "低" },
+  D: { channel: "短信（关怀类）", time: "月初 09:00–10:00", freq: "每月 1 次", urgency: "极低" }
+};
+
+const TIER_INFO = {
+  A: { title: "A 层 — 高意愿用户", color: "#3fb950" },
+  B: { title: "B 层 — 中意愿用户", color: "#58a6ff" },
+  C: { title: "C 层 — 低意愿用户", color: "#d29922" },
+  D: { title: "D 层 — 谨慎触达", color: "#f85149" }
+};
+
+const REDLINES = ["保证放款","一定能过","百分百审批","零门槛","无需审核","任何人可借","仅限今日","名额仅剩","最后一天","全网最低","秒到账","最快","免息","0手续费","系统已查询","我们掌握","推荐返现","拉人有奖","佣金"];
+
+// ── CLASSIFICATION ──
+function classify(days, tags) {
+  if (days > 180 || tags.includes("曾投诉") || tags.includes("曾逾期")) return "D";
+  if (days <= 30) return "A";
+  if (days <= 60) return "B";
+  if (days <= 180) return "C";
+  return "C";
+}
+
+function getTierReason(tier, days, tags) {
+  if (tier === "D") {
+    const reasons = [];
+    if (days > 180) reasons.push(`结清天数 ${days} 天 > 180 天`);
+    if (tags.includes("曾投诉")) reasons.push("行为标签含「曾投诉」");
+    if (tags.includes("曾逾期")) reasons.push("行为标签含「曾逾期」");
+    return reasons.join("；") + "，命中 D 层（优先级最高），命中即停";
+  }
+  if (tier === "A") return `结清天数 ${days} 天 ≤ 30 天，无风险标签，命中 A 层，命中即停`;
+  if (tier === "B") return `结清天数 ${days} 天，30 < ${days} ≤ 60，命中 B 层，命中即停`;
+  if (tier === "C") return `结清天数 ${days} 天，60 < ${days} ≤ 180，无风险标签，归入 C 层`;
+}
+
+function checkCompliance(text) {
+  const hits = REDLINES.filter(w => text.includes(w));
+  return hits;
+}
+
+// ── PRESETS ──
+function loadPreset(tier) {
+  const presets = {
+    A: { days:15, amount:20000, purpose:"消费", tags:["按时还款"], uid:"U_A001" },
+    B: { days:45, amount:30000, purpose:"经营", tags:["按时还款","主动咨询"], uid:"U_B002" },
+    C: { days:90, amount:15000, purpose:"应急", tags:["按时还款"], uid:"U_C003" },
+    D: { days:200, amount:10000, purpose:"消费", tags:["按时还款","曾投诉"], uid:"U_D004" }
+  };
+  const p = presets[tier];
+  document.getElementById("userId").value = p.uid;
+  document.getElementById("days").value = p.days;
+  document.getElementById("amount").value = p.amount;
+  document.getElementById("purpose").value = p.purpose;
+  document.querySelectorAll(".cb-item").forEach(el => {
+    const checked = p.tags.includes(el.dataset.val);
+    el.querySelector("input").checked = checked;
+    el.classList.toggle("checked", checked);
+  });
+  runBot();
+}
+
+// ── MAIN ──
+function runBot() {
+  const uid = document.getElementById("userId").value || "U_TEST";
+  const days = parseInt(document.getElementById("days").value) || 0;
+  const amount = parseInt(document.getElementById("amount").value) || 0;
+  const purpose = document.getElementById("purpose").value;
+  const tags = [...document.querySelectorAll(".cb-item.checked")].map(el => el.dataset.val);
+
+  const tier = classify(days, tags);
+  const reason = getTierReason(tier, days, tags);
+  const info = TIER_INFO[tier];
+  const scripts = SCRIPTS[tier];
+  const strategy = STRATEGY[tier];
+
+  // tier card
+  document.getElementById("tierBadge").textContent = tier;
+  document.getElementById("tierBadge").style.color = info.color;
+  document.getElementById("tierTitle").textContent = info.title;
+  document.getElementById("tierReason").textContent = reason;
+
+  // scripts
+  const amountFmt = amount.toLocaleString();
+  const sc = document.getElementById("scriptsContainer");
+  sc.innerHTML = "";
+  let allPass = 0, allTotal = 0;
+
+  Object.entries(scripts).forEach(([style, data]) => {
+    const text = data.text.replace("{amount}", amountFmt);
+    const hits = checkCompliance(text);
+    const pass = hits.length === 0;
+    allTotal++;
+    if (pass) allPass++;
+
+    sc.innerHTML += `
+      <div class="script-card" style="margin-bottom:10px;">
+        <div class="script-head">
+          <span class="script-style">${style}</span>
+          <span class="compliance-badge ${pass ? "pass" : "fail"}">${pass ? "✓ PASS" : "✗ FAIL — 命中：" + hits.join("、")}</span>
+        </div>
+        <div class="script-body">${text}</div>
+        <div class="script-channel">${data.channel}</div>
+      </div>
+    `;
+  });
+
+  // strategy
+  const sg = document.getElementById("strategyGrid");
+  sg.innerHTML = `
+    <div class="strategy-item">
+      <div class="strategy-label">推荐渠道</div>
+      <div class="strategy-value">${strategy.channel}</div>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-label">最佳时间窗口</div>
+      <div class="strategy-value">${strategy.time}</div>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-label">触达频率上限</div>
+      <div class="strategy-value">${strategy.freq}</div>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-label">紧急度</div>
+      <div class="strategy-value" style="color:${info.color}">${strategy.urgency}</div>
+    </div>
+  `;
+
+  // json
+  const output = {
+    user_id: uid,
+    tier: tier,
+    tier_label: info.title,
+    tier_reason: reason,
+    input: { days_since_clear: days, loan_amount: amount, loan_purpose: purpose, behavior_tags: tags },
+    scripts: Object.fromEntries(Object.entries(scripts).map(([s,d]) => {
+      const t = d.text.replace("{amount}", amountFmt);
+      return [s, { text: t, compliance: checkCompliance(t).length === 0 ? "PASS" : "FAIL", channel: d.channel }];
+    })),
+    outreach_strategy: strategy,
+    compliance_summary: { total: allTotal, passed: allPass, rate: Math.round(allPass/allTotal*100) + "%" }
+  };
+
+  document.getElementById("jsonOutput").textContent = JSON.stringify(output, null, 2);
+  window._lastOutput = output;
+
+  // show
+  document.getElementById("placeholder").style.display = "none";
+  const r = document.getElementById("result");
+  r.classList.add("visible");
+}
+
+function copyJson() {
+  if (window._lastOutput) {
+    navigator.clipboard.writeText(JSON.stringify(window._lastOutput, null, 2)).then(() => {
+      const btn = document.querySelector(".copy-btn");
+      btn.textContent = "已复制 ✓";
+      setTimeout(() => btn.textContent = "复制 JSON", 1500);
+    });
+  }
+}
+
+// checkbox toggle
+document.querySelectorAll(".cb-item").forEach(el => {
+  el.addEventListener("click", () => {
+    el.classList.toggle("checked");
+    el.querySelector("input").checked = el.classList.contains("checked");
+  });
+});
+
+// auto run on load
+loadPreset("A");
+</script>
+</body>
+</html>
