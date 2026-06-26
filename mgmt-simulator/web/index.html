@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>初级管理模拟器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0f0f1a;
+    color: #e8e8f0;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .main-layout {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+  }
+
+  .sidebar {
+    width: 280px;
+    background: #1a1a2e;
+    border-right: 1px solid #2e2e45;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #2e2e45;
+    padding: 12px 12px 0;
+    gap: 4px;
+  }
+
+  .sidebar-tab {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: all 0.2s;
+  }
+
+  .sidebar-tab.active {
+    background: #0f0f1a;
+    color: #c8b8f8;
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .sidebar-content::-webkit-scrollbar { width: 4px; }
+  .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-content::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .history-item {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: #0f0f1a;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .history-item:hover {
+    background: #1e1e30;
+    border-color: #3a2d5c;
+  }
+
+  .history-item.active {
+    border-color: #6c4fd4;
+    background: #2a1e45;
+  }
+
+  .history-time {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .history-preview {
+    font-size: 13px;
+    color: #aaa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .card-item {
+    padding: 12px;
+    background: #0f0f1a;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #2e2e45;
+  }
+
+  .card-item:hover {
+    border-color: #6c4fd4;
+    background: #1e1e30;
+  }
+
+  .card-type {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    color: #c8b8f8;
+    font-weight: 500;
+  }
+
+  .new-chat-btn {
+    margin: 0 12px 12px;
+    padding: 10px;
+    background: linear-gradient(135deg, #6c4fd4, #9b5de5);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: opacity 0.2s;
+  }
+
+  .new-chat-btn:hover {
+    opacity: 0.85;
+  }
+
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header {
+    width: 100%;
+    max-width: 720px;
+    padding: 24px 20px 16px;
+    text-align: center;
+    position: relative;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #c8b8f8;
+    letter-spacing: 2px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: #888;
+    margin-top: 6px;
+  }
+
+  .status-indicator {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #888;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+  }
+
+  .status-dot.online {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+  }
+
+  .status-dot.offline {
+    background: #ef4444;
+  }
+
+  .chat-container {
+    width: 100%;
+    max-width: 720px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chat-container::-webkit-scrollbar { width: 4px; }
+  .chat-container::-webkit-scrollbar-track { background: transparent; }
+  .chat-container::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .message {
+    display: flex;
+    gap: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .avatar.bot { background: linear-gradient(135deg, #6c4fd4, #9b5de5); }
+  .avatar.user { background: linear-gradient(135deg, #2d6a4f, #40916c); }
+
+  .bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .message.bot .bubble {
+    background: #1e1e30;
+    border: 1px solid #2e2e45;
+    border-top-left-radius: 4px;
+    color: #ddd;
+  }
+
+  .message.user .bubble {
+    background: linear-gradient(135deg, #4a3080, #6c4fd4);
+    border-top-right-radius: 4px;
+    color: #fff;
+  }
+
+  .typing .bubble {
+    color: #888;
+    font-style: italic;
+  }
+
+  .quick-actions {
+    width: 100%;
+    max-width: 720px;
+    padding: 0 20px 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .quick-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #3a2d5c;
+    background: transparent;
+    color: #a890d8;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .quick-btn:hover {
+    background: #2a1e45;
+    border-color: #6c4fd4;
+    color: #c8b8f8;
+  }
+
+  .input-area {
+    width: 100%;
+    max-width: 720px;
+    padding: 12px 20px 24px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .input-wrap {
+    flex: 1;
+    background: #1e1e30;
+    border: 1px solid #2e2e45;
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-end;
+    transition: border-color 0.2s;
+  }
+
+  .input-wrap:focus-within { border-color: #6c4fd4; }
+
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #e8e8f0;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+  }
+
+  textarea::placeholder { color: #555; }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #6c4fd4, #9b5de5);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .divider {
+    text-align: center;
+    font-size: 12px;
+    color: #444;
+    padding: 8px 0;
+  }
+
+  .empty-hint {
+    color: #555;
+    font-size: 13px;
+    text-align: center;
+    padding: 24px 12px;
+  }
+
+  /* 卡池弹窗 */
+  .card-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-modal.open { display: flex; }
+  .card-modal-inner {
+    background: #1a1a2e;
+    border: 1px solid #3a2d5c;
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .card-modal-inner::-webkit-scrollbar { width: 4px; }
+  .card-modal-inner::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .card-modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .card-modal-type { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .card-modal-title { font-size: 18px; color: #c8b8f8; font-weight: 600; margin-bottom: 14px; }
+  .card-modal-scene { font-size: 14px; color: #ccc; line-height: 1.7; margin-bottom: 14px; }
+  .card-modal-rule { font-size: 13px; color: #a890d8; line-height: 1.6; padding: 12px; background: #0f0f1a; border-radius: 8px; }
+
+  /* 汉堡菜单按钮，桌面端隐藏 */
+  .menu-btn {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: 14px;
+    background: none;
+    border: none;
+    color: #a890d8;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+    z-index: 10;
+  }
+
+  /* 侧边栏遮罩，桌面端不显示 */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 45;
+  }
+  .sidebar-backdrop.open { display: block; }
+
+  /* 手机端适配 */
+  @media (max-width: 768px) {
+    body {
+      height: 100vh;
+      height: 100dvh;
+    }
+    .main-layout {
+      height: 100vh;
+      height: 100dvh;
+    }
+    .sidebar {
+      position: fixed;
+      left: -290px;
+      top: 0;
+      height: 100%;
+      z-index: 50;
+      transition: left 0.25s ease;
+      width: 280px;
+    }
+    .sidebar.open { left: 0; }
+    .menu-btn { display: block; }
+    .header {
+      padding-top: 16px;
+      padding-bottom: 12px;
+      padding-left: 52px;
+    }
+    .header h1 { font-size: 17px; letter-spacing: 1px; }
+    .header p { font-size: 12px; }
+    .status-indicator { top: 18px; font-size: 11px; }
+    .chat-container { padding: 0 12px 12px; gap: 12px; }
+    .quick-actions { padding: 0 12px 6px; gap: 6px; }
+    .quick-btn { font-size: 12px; padding: 5px 10px; }
+    .input-area { padding: 8px 12px 20px; }
+    .bubble { max-width: 88%; font-size: 14px; }
+    .card-modal-inner { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+<div class="main-layout">
+  <!-- 左侧边栏 -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" id="tab-history" onclick="switchTab('history')">📋 历史</button>
+      <button class="sidebar-tab" id="tab-cards" onclick="switchTab('cards')">🎴 卡池</button>
+    </div>
+
+    <div class="sidebar-content" id="panel-history">
+      <div class="empty-hint" id="history-empty">暂无历史记录</div>
+    </div>
+
+    <div class="sidebar-content" id="panel-cards" style="display:none">
+      <p style="font-size:12px;color:#666;padding:0 0 10px;line-height:1.6">分析完成的卡牌会出现在这里</p>
+      <div class="card-grid" id="card-grid"></div>
+      <div class="empty-hint" id="cards-empty">还没有分析完成的卡牌</div>
+    </div>
+
+    <button class="new-chat-btn" onclick="newSession()">+ 新建对话</button>
+  </div>
+
+  <!-- 主聊天区 -->
+  <div class="chat-area">
+    <div class="header">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1>🎴 初级管理模拟器</h1>
+      <p>识局 · 读人 · 防身 · 应对</p>
+      <div class="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">检测中...</span>
+      </div>
+    </div>
+
+    <div class="chat-container" id="chat">
+      <div class="message bot">
+        <div class="avatar bot">🎴</div>
+        <div class="bubble">你好，我是初级管理模拟器。
+
+我可以帮你：
+• 识别人际局面中的潜在风险
+• 解读他人的真实动机
+• 提供不撕破脸的防身策略
+• 推演每种应对方式的后果
+
+发送「抽卡」体验今日情局卡，或者直接描述你遇到的局面。</div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="quick-btn" onclick="sendQuick('抽卡')">🎴 今日抽卡</button>
+      <button class="quick-btn" onclick="sendQuick('我遇到一个情况想分析一下')">💬 描述局面</button>
+      <button class="quick-btn" onclick="sendQuick('职场上有人一直抢我功劳怎么办')">🏢 职场求助</button>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="input" placeholder="描述你的局面，或发送「抽卡」..." rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      </div>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- 卡牌详情弹窗 -->
+<div class="card-modal" id="card-modal" onclick="closeCardModal(event)">
+  <div class="card-modal-inner">
+    <button class="card-modal-close" onclick="document.getElementById('card-modal').classList.remove('open')">✕</button>
+    <div class="card-modal-type" id="modal-type"></div>
+    <div class="card-modal-title" id="modal-title"></div>
+    <div class="card-modal-scene" id="modal-scene"></div>
+    <div class="card-modal-rule" id="modal-rule"></div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = (() => {
+    // 本地访问：直接打 localhost
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+    // 通过 cpolar 等内网穿透访问：API 和页面在同一个域下，但 bot 提供的 /chat 接口
+    // 通过穿透直接暴露，所以用同 origin 即可
+    return location.origin;
+  })();
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  }
+
+  // ── 会话管理 ──────────────────────────────────────────────
+  let currentSessionId = null;
+  let sessions = JSON.parse(localStorage.getItem('mgmt_sessions') || '{}');
+  // { id: { id, createdAt, preview, messages: [{role, text}] } }
+
+  function saveSession(id) {
+    localStorage.setItem('mgmt_sessions', JSON.stringify(sessions));
+  }
+
+  function newSession() {
+    const id = 'web_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    sessions[id] = { id, createdAt: Date.now(), preview: '新对话', messages: [] };
+    currentSessionId = id;
+    saveSession();
+    renderHistory();
+    resetChatUI();
+  }
+
+  function switchSession(id) {
+    currentSessionId = id;
+    const s = sessions[id];
+    resetChatUI();
+    s.messages.forEach(m => addMessage(m.role, m.text, false));
+    renderHistory();
+    closeSidebar();
+  }
+
+  function resetChatUI() {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = `
+      <div class="message bot">
+        <div class="avatar bot">🎴</div>
+        <div class="bubble">你好，我是初级管理模拟器。
+
+我可以帮你：
+• 识别人际局面中的潜在风险
+• 解读他人的真实动机
+• 提供不撕破脸的防身策略
+• 推演每种应对方式的后果
+
+发送「抽卡」体验今日情局卡，或者直接描述你遇到的局面。</div>
+      </div>`;
+  }
+
+  function renderHistory() {
+    const container = document.getElementById('panel-history');
+    const empty = document.getElementById('history-empty');
+    const ids = Object.keys(sessions).sort((a, b) => sessions[b].createdAt - sessions[a].createdAt);
+    const existing = container.querySelectorAll('.history-item');
+    existing.forEach(e => e.remove());
+
+    if (ids.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    ids.forEach(id => {
+      const s = sessions[id];
+      const div = document.createElement('div');
+      div.className = 'history-item' + (id === currentSessionId ? ' active' : '');
+      div.innerHTML = `
+        <div class="history-time">${formatTime(s.createdAt)}</div>
+        <div class="history-preview">${escapeHtml(s.preview)}</div>`;
+      div.onclick = () => switchSession(id);
+      container.appendChild(div);
+    });
+  }
+
+  function formatTime(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    if (isToday) return `今天 ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+  }
+
+  // ── 卡池管理 ──────────────────────────────────────────────
+  let cardPool = JSON.parse(localStorage.getItem('mgmt_card_pool') || '[]');
+  // 每条: { id, type, title, scene, rule, addedAt }
+
+  function tryAddToCardPool(botReply) {
+    // 分析完成的回复不含 "第一问" "第二问" "第三问" 且包含可识别的策略内容
+    // 通过 bot.py 逻辑：抽卡首条回复有 "🎴" 且含 "第一问"；分析完成后无该标志
+    const isCardIntro = botReply.includes('第一问') || botReply.includes('第二问') || botReply.includes('第三问');
+    if (isCardIntro) return;
+
+    // 抽卡回复含 "🎴" 开头，说明是首次展示卡牌
+    if (!botReply.startsWith('🎴')) return;
+
+    // 此处已是分析完成（由 EXPLAIN_SYSTEM_PROMPT 或 max_rounds 触发），但实际上
+    // bot 在完成分析后返回的内容不以 "🎴" 开头，所以这条不会触发
+    // 卡池的触发条件在 sendMessage 里单独处理，见下方注释
+  }
+
+  function addToCardPool(card) {
+    if (cardPool.find(c => c.id === card.id)) return;
+    cardPool.push({ ...card, addedAt: Date.now() });
+    localStorage.setItem('mgmt_card_pool', JSON.stringify(cardPool));
+    renderCardPool();
+  }
+
+  function renderCardPool() {
+    const grid = document.getElementById('card-grid');
+    const empty = document.getElementById('cards-empty');
+    grid.innerHTML = '';
+    if (cardPool.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    cardPool.slice().reverse().forEach(card => {
+      const div = document.createElement('div');
+      div.className = 'card-item';
+      div.innerHTML = `<div class="card-type">${escapeHtml(card.type)}卡</div><div class="card-title">${escapeHtml(card.title)}</div>`;
+      div.onclick = () => openCardModal(card);
+      grid.appendChild(div);
+    });
+  }
+
+  function openCardModal(card) {
+    document.getElementById('modal-type').textContent = card.type + '卡';
+    document.getElementById('modal-title').textContent = card.title;
+    document.getElementById('modal-scene').textContent = card.scene;
+    document.getElementById('modal-rule').textContent = '💡 ' + card.rule;
+    document.getElementById('card-modal').classList.add('open');
+  }
+
+  function closeCardModal(e) {
+    if (e.target.id === 'card-modal') document.getElementById('card-modal').classList.remove('open');
+  }
+
+  // ── Tab 切换 ──────────────────────────────────────────────
+  function switchTab(name) {
+    document.getElementById('panel-history').style.display = name === 'history' ? 'block' : 'none';
+    document.getElementById('panel-cards').style.display = name === 'cards' ? 'block' : 'none';
+    document.getElementById('tab-history').classList.toggle('active', name === 'history');
+    document.getElementById('tab-cards').classList.toggle('active', name === 'cards');
+  }
+
+  // ── 聊天核心 ──────────────────────────────────────────────
+  let pendingCard = null; // 当前正在分析的卡牌
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendQuick(text) {
+    document.getElementById('input').value = text;
+    sendMessage();
+  }
+
+  function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function addMessage(role, text, persist = true) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.innerHTML = `
+      <div class="avatar ${role}">${role === 'bot' ? '🎴' : '👤'}</div>
+      <div class="bubble">${escapeHtml(text)}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+
+    if (persist && currentSessionId) {
+      sessions[currentSessionId].messages.push({ role, text });
+      if (role === 'user' && sessions[currentSessionId].preview === '新对话') {
+        sessions[currentSessionId].preview = text.slice(0, 30);
+      }
+      saveSession();
+      renderHistory();
+    }
+    return div;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('input');
+    const btn = document.getElementById('sendBtn');
+    const text = input.value.trim();
+    if (!text || btn.disabled) return;
+
+    if (!currentSessionId) newSession();
+
+    input.value = '';
+    input.style.height = 'auto';
+    btn.disabled = true;
+
+    addMessage('user', text);
+
+    const isDrawCard = text === '抽卡' || text === '今日卡片' || text === '换一张';
+
+    const typing = addMessage('bot', '🤔 正在分析局势...', false);
+    typing.classList.add('typing');
+
+    try {
+      const res = await fetch(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: currentSessionId, message: text })
+      });
+      const data = await res.json();
+      const reply = data.reply || '';
+      typing.remove();
+      addMessage('bot', reply);
+
+      // 检测抽卡首条回复，记录当前卡牌
+      if (isDrawCard && reply.includes('🎴')) {
+        const match = reply.match(/🎴\s*(\S+?)卡·(.+?)\n/);
+        if (match) {
+          pendingCard = { type: match[1], title: match[2] };
+        } else {
+          pendingCard = { type: '情局', title: '今日抽卡' };
+        }
+      }
+
+      // 检测分析完成：不含引导问句 且 pendingCard 存在
+      if (pendingCard && !isDrawCard) {
+        const isAnalysisDone = !reply.includes('第一问') && !reply.includes('第二问') && !reply.includes('第三问') && !reply.includes('你觉得');
+        if (isAnalysisDone) {
+          // 从 cards.json 查询完整卡牌数据（前端直接内嵌）
+          const fullCard = CARDS_DATA.find(c => c.title === pendingCard.title);
+          if (fullCard) {
+            addToCardPool(fullCard);
+          } else {
+            addToCardPool({ id: 'custom_' + Date.now(), type: pendingCard.type, title: pendingCard.title, scene: '', rule: '', addedAt: Date.now() });
+          }
+          pendingCard = null;
+        }
+      }
+    } catch (e) {
+      typing.remove();
+      addMessage('bot', '⚠️ 无法连接到后端服务。\n\n请确认 bot.py 已启动（在终端运行 python bot.py），然后重试。');
+      checkStatus();
+    }
+
+    btn.disabled = false;
+    input.focus();
+  }
+
+  // ── 连接状态检测 ──────────────────────────────────────────
+  async function checkStatus() {
+    const dot = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    try {
+      const res = await fetch(`${API_BASE}/`, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        dot.className = 'status-dot online';
+        text.textContent = '已连接';
+      } else {
+        throw new Error('not ok');
+      }
+    } catch {
+      dot.className = 'status-dot offline';
+      text.textContent = '服务未启动';
+    }
+  }
+
+  checkStatus();
+  setInterval(checkStatus, 15000);
+  const CARDS_DATA = [{"id":"card_001","type":"识局","title":"盟友的当众质疑","scene":"你是某部门负责人，手下干将小周借着清理废弃资源的名义，顺手占了一些不该占的东西。事情被你最信任的合伙人老刘发现了。老刘当着几个同事的面问你：小周做的那件事，你知道吗？语气平静，但眼神里有东西。就在同一天，你们刚谈成了一个大项目，收益远超预期。","rule":"当被盟友质疑时，不要在对方的问题框架里辩解，要找到一个让对方不再需要这个问题的东西。"},{"id":"card_002","type":"读人","title":"情绪激惹背后的陷阱","scene":"公司跨部门大会上，对方团队突然公开揭露你们的内部问题，言辞激烈。你的队友怒火中烧，要立即还击。但你注意到，对方负责人面带微笑，冷静地看着你们的反应，似乎在等什么。","rule":"情绪激惹往往隐藏着陷阱。真正的识局是识别对方行为背后的意图，而非表面意思。"},{"id":"card_003","type":"防身","title":"权力不对等时的迂回","scene":"项目现场，安保人员粗暴对待群众，你同事当场制止。安保冷冷说：这是王总安排的，现场只听他一人指挥。你同事没有王总的授权，正面对抗随时可能吃亏。","rule":"在权力不对等的组织中，不要直接对抗，通过实际行动改变事实。避免正面权力宣示，用同情心规避冲突。"},{"id":"card_004","type":"应对","title":"道德反杀","scene":"竞争对手公开指责你的团队：你们私占资源、中饱私囊，迟早成为行业毒瘤！他说得义正辞严，已经赢得了部分人的支持。你需要回应，但辩解只会越描越黑。","rule":"面对道德指责，承认小错、强调大善。然后翻转对方自身的矛盾来瓦解其道德权威。攻击对方的虚伪比辩解自己更有效。"},{"id":"card_005","type":"识局","title":"被弹劾时的正确反应","scene":"平级同事小耿向上级投诉你：他在项目中强占功劳、纵容下属乱来。上级开始调查你。你发现小耿之前在会议上反对过你的方案，现在借机发难。","rule":"不要被指责激怒而辩解，要先看清对手的底牌。一旦看清，立即对等反击，让决策者在混乱中倾向于搁置问题。"},{"id":"card_006","type":"防身","title":"制造对方的合理恐惧","scene":"出差途中，你发现被竞争对手的人跟踪。对方人多你孤身，但他们行动迟疑，似乎不敢声张。你需要做出选择：继续躲，还是主动出击。","rule":"在信息不对称的情况下，不是隐藏自己，而是创造对手的合理恐惧。让对手的防守本能为你效力。"},{"id":"card_007","type":"应对","title":"先发制人的反击","scene":"你收到消息，明天会议上有人要弹劾你。你手里也有对方的把柄：他在项目中不听指挥、泄露信息。你可以提前出手，但选错了方式可能显得你小肚鸡肠。","rule":"先发制人，让盟友代为出击，不要自己亲自辩解。让决策者在混乱中选择搁置是最好的结果。"},{"id":"card_008","type":"读人","title":"识破诱敌深入","scene":"竞争对手在关键位置囤积资源但按兵不动。你的团队建议：他们不动，咱们就先打他最薄弱的环节。但你隐约觉得，这个建议正是对方想让你做的事。","rule":"高手的识局不在于看到对手在做什么，而在于理解对手在诱导你做什么。主动权往往在按兵不动的那方。"},{"id":"card_009","type":"识局","title":"选择性参与者","scene":"有个跨部门同事，项目顺利时天天来刷存在感，说我当时就建议过。项目遇到困难时，一个月都不露面。现在项目又有起色了，他又出现了，主动说要贡献力量。","rule":"对方的行为模式是选择性寄生。他利用了你不愿撕破脸的心理。让越界有成本是唯一有效的办法。"},{"id":"card_010","type":"防身","title":"让越界有成本","scene":"那个爱抢功劳的同事又来了，说这次我也出力不少。你之前划过线、提过要求，但他依然我行我素。因为他知道你不会真的翻脸。","rule":"不是划线，而是让越界有成本。把你的额外付出可见化，把对方的懈怠也可见化。不撕破脸，但越界开始有代价。"},{"id":"card_011","type":"应对","title":"利益转移大法","scene":"下属小周的违规行为被盟友当众质疑。你知道解释只会越描越黑。此时你手上刚拿下一个大项目，收益是平时的十倍，能解决团队近期所有的资金问题。","rule":"把注意力引向更大的共同利益。不解释小周的事，而是立即开始计算新收益能解决什么问题。人的注意力会自动跟随利益走。"},{"id":"card_012","type":"读人","title":"公开质疑的真实目的","scene":"信任的合伙人平时从不当众质疑你，但这次他在会议室里，当着三位同事的面，问了你一个很尖锐的问题。你们刚完成了一次成功合作，关系应该很好。","rule":"公开场合的质疑是在用见证人施压。他最在意的不是答案本身，而是你会不会对他说实话。这是对信任的一次测试。"},{"id":"card_013","type":"识局","title":"主动示弱的反向试探","scene":"面试时求职者主动说：我家里情况比较困难，所以特别珍惜这个机会，薪资方面我可以接受低于市场价。这番话让你有些意外。","rule":"越主动暴露窘况的人，往往越在设局诱导对方的同情心。弱势者主动示弱时，可能在进行反向试探，目的是获得其他方面的补偿。"},{"id":"card_014","type":"应对","title":"权力联系的精确化","scene":"在陌生场合被人轻视，对方语气不善：你是哪来的，我们这里不欢迎外人介绍。你想解释背景，但你知道空口说白话没用。你想起你认识这里一个重要人物。","rule":"精确地提及对方认识的权力人物名字，能立刻改变态度。不是说我认识你们领导，而是张总上周还和我提到这件事。具体才有力量。"},{"id":"card_015","type":"防身","title":"不要被单独隔离","scene":"谈判开始前，对方提议：咱们两位老板单独聊，其他人先在会议室等。你只有一个人，对方来了三个人，两个是你不认识的。","rule":"不要让对方觉得你可以被单独处置。即使同伴只是旁听，也能给对方后援的印象。坚持两人一起进谈判室。"},{"id":"card_016","type":"识局","title":"工作安排里的信号","scene":"上司突然让你整理一下工作交接文档，做个详细的。语气很平常，但这个要求有些突然。你最近工作没出问题，项目也在正常推进，没有任何预兆。","rule":"工作安排的微妙变化往往预示着结构性变化。整理交接文档意味着有人要接手你的工作，这是变动前的信号。"},{"id":"card_017","type":"应对","title":"让对方说出你的答案","scene":"下属来找你求助：这个项目我搞不定，您能帮我做吗？你知道答案，但如果直接告诉他，他不会真正理解，下次遇到还是来找你。","rule":"不是直接给答案，而是问你觉得怎样最好。引导对方自己说出你想要的结论。别人自己说出的答案，比你直接说的执行力强十倍。"},{"id":"card_018","type":"读人","title":"过度赞美是试探","scene":"面试官连续夸你：你的背景太优秀了，你的经历真是少见，我们团队非常需要你这样的人。你开始有点飘，准备开口提超出预期的薪资要求。","rule":"赞美越过度，越可能是在测试你是否容易被捧、是否会因此降低警惕、是否会提出不合理要求。过度赞美是试探，不是真心话。"},{"id":"card_019","type":"防身","title":"承诺要留余地","scene":"面试官问：这个技术栈你熟悉吗？你学过一些，不算精通，但想表现自己，准备说我很熟悉，没问题。","rule":"不要说完全会，而要说接触过，但每个公司情况不一样。承诺的余地是后续调整的空间。给自己留后路，不是软弱，是智慧。"},{"id":"card_020","type":"应对","title":"借他人背书加信","scene":"刚加入一个新行业，没有人认识你。你需要在一个重要场合快速建立信任和可信度，但你没有时间慢慢积累口碑。","rule":"通过合作方的知名度建立自己的信誉。不是说我很厉害，而是说我跟某某合作过，他们对这个很认可。借由相关者的身份来提升自己的可信度。"}];
+
+  // 初始化：如没有会话就创建一个
+  if (Object.keys(sessions).length === 0) {
+    newSession();
+  } else {
+    const ids = Object.keys(sessions).sort((a,b) => sessions[b].createdAt - sessions[a].createdAt);
+    currentSessionId = ids[0];
+    const s = sessions[currentSessionId];
+    if (s.messages.length > 0) {
+      resetChatUI();
+      s.messages.forEach(m => addMessage(m.role, m.text, false));
+    }
+    renderHistory();
+  }
+
+  renderCardPool();
+</script>
+</body>
+</html>
