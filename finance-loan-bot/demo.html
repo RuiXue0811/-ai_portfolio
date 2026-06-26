@@ -964,7 +964,8 @@ function copyJson() {
 
 // checkbox toggle
 document.querySelectorAll(".cb-item").forEach(el => {
-  el.addEventListener("click", () => {
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
     el.classList.toggle("checked");
     el.querySelector("input").checked = el.classList.contains("checked");
   });
